@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import "../theme"
 
 Rectangle {
     id: hudPill
@@ -13,8 +12,8 @@ Rectangle {
     width: pillRow.implicitWidth + 24
     height: 38
     radius: 19
-    color: mouseArea.containsMouse ? Colors.backgroundHover : Colors.backgroundHud
-    border.color: mouseArea.containsMouse ? Colors.accentCyan : Colors.borderHud
+    color: mouseArea.containsMouse ? "#F5161B22" : "#DE0E1117"
+    border.color: mouseArea.containsMouse ? "#38BDF8" : "#1FFFFFFF"
     border.width: 1
 
     Behavior on color { ColorAnimation { duration: 150 } }
@@ -26,7 +25,7 @@ Rectangle {
         spacing: 8
 
         Image {
-            source: "qrc:/assets/icons/codehalo.png"
+            source: "qrc:/CodeHalo/assets/icons/codehalo.png"
             sourceSize.width: 18
             sourceSize.height: 18
             Layout.alignment: Qt.AlignVCenter
@@ -36,26 +35,26 @@ Rectangle {
         Text {
             id: pillTitle
             text: "CodeHalo"
-            font.family: Typography.fontFamily
-            font.pixelSize: Typography.fontTitle
+            font.family: "Segoe UI, Inter, sans-serif"
+            font.pixelSize: 12
             font.bold: true
-            color: Colors.textMain
+            color: "#F1F5F9"
         }
 
         Rectangle {
             width: 6
             height: 6
             radius: 3
-            color: Colors.accentGreen
+            color: "#10B981"
             Layout.alignment: Qt.AlignVCenter
         }
 
         Text {
             id: pillStatus
             text: "Ready"
-            font.family: Typography.fontFamily
-            font.pixelSize: Typography.fontBody
-            color: Colors.textMuted
+            font.family: "Segoe UI, Inter, sans-serif"
+            font.pixelSize: 11
+            color: "#94A3B8"
         }
 
         Rectangle {
@@ -68,10 +67,10 @@ Rectangle {
                 id: edgeLabel
                 anchors.centerIn: parent
                 text: "TOP"
-                font.family: Typography.fontFamily
-                font.pixelSize: Typography.fontBadge
+                font.family: "Segoe UI, Inter, sans-serif"
+                font.pixelSize: 9
                 font.bold: true
-                color: Colors.accentCyan
+                color: "#38BDF8"
             }
         }
     }

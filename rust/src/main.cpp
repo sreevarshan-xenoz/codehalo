@@ -4,10 +4,6 @@
 #include <QColor>
 
 int main(int argc, char *argv[]) {
-    // Enable software/GPU acceleration & high-DPI scaling
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-
     QGuiApplication app(argc, argv);
     app.setOrganizationName("CodeHalo");
     app.setApplicationName("CodeHalo");

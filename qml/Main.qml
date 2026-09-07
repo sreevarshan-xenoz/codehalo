@@ -3,7 +3,6 @@ import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Controls
 import "components"
-import "theme"
 
 Window {
     id: mainWindow
@@ -49,8 +48,8 @@ Window {
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: 12
-            color: Colors.backgroundHud
-            border.color: Colors.borderHud
+            color: "#DE0E1117"
+            border.color: "#1FFFFFFF"
             border.width: 1
 
             Behavior on opacity {
@@ -67,10 +66,10 @@ Window {
                     Layout.fillWidth: true
                     Text {
                         text: "CODEHALO DISPLAY & EDGE"
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Typography.fontBadge
+                        font.family: "Segoe UI, Inter, sans-serif"
+                        font.pixelSize: 9
                         font.bold: true
-                        color: Colors.textMuted
+                        color: "#94A3B8"
                     }
                     Item { Layout.fillWidth: true }
                     Button {
@@ -102,7 +101,7 @@ Window {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     radius: 8
-                    color: Colors.surfaceInput
+                    color: "#10FFFFFF"
 
                     ColumnLayout {
                         anchors.fill: parent
@@ -111,15 +110,15 @@ Window {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            Text { text: "Render Engine"; color: Colors.textMuted; font.pixelSize: Typography.fontBody }
+                            Text { text: "Render Engine"; color: "#94A3B8"; font.pixelSize: 11 }
                             Item { Layout.fillWidth: true }
-                            Text { text: "Qt 6 Quick / QML (GPU Native)"; color: Colors.accentCyan; font.pixelSize: Typography.fontBody }
+                            Text { text: "Qt 6 Quick / QML (GPU Native)"; color: "#38BDF8"; font.pixelSize: 11 }
                         }
                         RowLayout {
                             Layout.fillWidth: true
-                            Text { text: "Window State"; color: Colors.textMuted; font.pixelSize: Typography.fontBody }
+                            Text { text: "Window State"; color: "#94A3B8"; font.pixelSize: 11 }
                             Item { Layout.fillWidth: true }
-                            Text { text: "Frameless / Always-On-Top"; color: Colors.accentGreen; font.pixelSize: Typography.fontBody }
+                            Text { text: "Frameless / Always-On-Top"; color: "#10B981"; font.pixelSize: 11 }
                         }
                     }
                 }

@@ -19,6 +19,7 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS
 )
 
 qt_standard_project_setup()
+qt_policy(SET QTP0001 OLD)
 
 # CXX-Qt integration
 include(FetchContent)
@@ -29,8 +30,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cxx_qt)
 
-# Add QML module
+# Add linker flags for MinGW duplicate template symbols
+add_link_options(-Wl,--allow-multiple-definition)
+
+# Add QML module (STATIC to avoid DLL symbol export clash on MinGW)
 qt_add_qml_module(codehalo_qml
+    STATIC
     URI CodeHalo
     VERSION 1.0
     QML_FILES
@@ -46,8 +51,8 @@ qt_add_qml_module(codehalo_qml
 # Rust bridge library
 add_subdirectory(rust)
 
-# Main target
-qt_add_executable(codehalo
+# Main target (use standard console entry point to match MinGW UCRT toolchain)
+add_executable(codehalo
     rust/src/main.cpp
 )
 
@@ -59,9 +64,4 @@ target_link_libraries(codehalo PRIVATE
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickControls2
-)
-
-set_target_properties(codehalo PROPERTIES
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
 )

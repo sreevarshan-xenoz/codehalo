@@ -1,7 +1,7 @@
-pragma Singleton
 import QtQuick
 
 QtObject {
+    id: colors
     // Dark futuristic palette
     readonly property color backgroundHud: "#DE0E1117"
     readonly property color backgroundHover: "#F5161B22"
