@@ -1,6 +1,6 @@
 pub mod models;
 
-use models::{EdgePosition, MonitorInfo, ProviderUsage};
+use models::{EdgePosition, ProviderUsage};
 use std::sync::Mutex;
 
 pub struct ApplicationState {

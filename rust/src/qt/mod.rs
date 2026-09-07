@@ -1,3 +1,3 @@
 pub mod bridge;
 
-pub use bridge::ffi::CodeHaloBridge;
+pub use bridge::qobject::CodeHaloBridge;
