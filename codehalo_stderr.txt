@@ -1,0 +1,2 @@
+[CodeHalo] QML URL: QUrl("qrc:/CodeHalo/qml/Main.qml")
+[CodeHalo] Running at QPoint(1182,0) size QSize(196, 36)

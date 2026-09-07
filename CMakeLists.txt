@@ -46,6 +46,10 @@ qt_add_qml_module(codehalo_qml
         qml/theme/Typography.qml
         qml/components/Halo.qml
         qml/components/Hud.qml
+        qml/components/NotchPill.qml
+        qml/components/ProviderRing.qml
+        qml/components/ExpandedCard.qml
+        qml/components/ProviderRow.qml
     RESOURCES
         assets/icons/codehalo.png
 )

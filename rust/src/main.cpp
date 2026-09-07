@@ -1,64 +1,123 @@
 #include <QApplication>
-#include <QQmlApplicationEngine>
 #include <QQuickWindow>
-#include <QQuickWidget>
-#include <QLabel>
+#include <QQuickView>
+#include <QQuickItem>
 #include <QFile>
 #include <QDir>
 #include <QDebug>
+#include <QScreen>
+#include <QGuiApplication>
+
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
 
 int main(int argc, char *argv[]) {
+    // Must be called before QApplication for translucent background to work
+    QQuickWindow::setDefaultAlphaBuffer(true);
+
     QApplication app(argc, argv);
     app.setOrganizationName("CodeHalo");
     app.setApplicationName("CodeHalo");
 
-    QQmlApplicationEngine engine;
-
-    // Locate QML file
+    // Locate QML — bundled in qrc
     QUrl qmlUrl(QStringLiteral("qrc:/CodeHalo/qml/Main.qml"));
     if (!QFile::exists(QStringLiteral(":/CodeHalo/qml/Main.qml"))) {
-        QString localPath = QDir::current().filePath(QStringLiteral("../qml/Main.qml"));
-        if (!QFile::exists(localPath)) {
-            localPath = QDir::current().filePath(QStringLiteral("qml/Main.qml"));
-        }
+        // Fallback: local file (dev mode)
+        QString localPath = QDir(QApplication::applicationDirPath()).filePath("../qml/Main.qml");
+        if (!QFile::exists(localPath))
+            localPath = QDir(QApplication::applicationDirPath()).filePath("qml/Main.qml");
         qmlUrl = QUrl::fromLocalFile(localPath);
+        qDebug() << "[CodeHalo] Dev mode: loading from" << localPath;
     }
 
-    qDebug() << "[CodeHalo] Loading QML engine from:" << qmlUrl;
+    qDebug() << "[CodeHalo] QML URL:" << qmlUrl;
 
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
-                     &app, []() { QCoreApplication::exit(-1); },
-                     Qt::QueuedConnection);
+    QQuickView view;
+    view.setTitle(QStringLiteral("CodeHalo"));
 
-    // Create top-level overlay window using QWidget with native Win32 window manager integration
-    QWidget overlay;
-    overlay.setWindowTitle(QStringLiteral("CodeHalo"));
-    overlay.setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-    overlay.setAttribute(Qt::WA_TranslucentBackground, true);
+    // ── TRUE TRANSPARENT WINDOW ───────────────────────────────────────────────
+    // Qt::transparent means the WINDOW itself is fully transparent.
+    // The QML content draws only the notch shape — everything else is see-through.
+    view.setColor(QColor(Qt::transparent));
 
-    QQuickWidget *quickWidget = new QQuickWidget(&overlay);
-    quickWidget->setClearColor(Qt::transparent);
-    quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    quickWidget->setSource(qmlUrl);
+    // Window flags: frameless, always-on-top, no taskbar entry (Qt::Tool)
+    // Qt::ToolTip avoids the window appearing in alt-tab and taskbar while
+    // still getting a proper HWND with WS_EX_LAYERED compositing on Windows.
+    view.setFlags(
+        Qt::Window
+        | Qt::FramelessWindowHint
+        | Qt::WindowStaysOnTopHint
+        | Qt::NoDropShadowWindowHint
+        | Qt::WindowDoesNotAcceptFocus
+        | Qt::Tool
+    );
 
-    int initialWidth = 380;
-    int initialHeight = 54;
-    overlay.resize(initialWidth, initialHeight);
-    quickWidget->resize(initialWidth, initialHeight);
+    view.setResizeMode(QQuickView::SizeViewToRootObject);
 
-    if (QScreen *screen = QApplication::primaryScreen()) {
-        QRect geom = screen->availableGeometry();
-        int x = geom.x() + (geom.width() - initialWidth) / 2;
-        int y = geom.y() + 16;
-        overlay.move(x, y);
+    // Log QML errors
+    QObject::connect(&view, &QQuickView::statusChanged, [&view](QQuickView::Status status) {
+        if (status == QQuickView::Error) {
+            for (const auto &err : view.errors())
+                qCritical() << "[CodeHalo QML Error]" << err.toString();
+        }
+    });
+
+    view.setSource(qmlUrl);
+
+    if (view.status() == QQuickView::Error) {
+        for (const auto &err : view.errors())
+            qCritical() << "[CodeHalo]" << err.toString();
+        return 1;
     }
 
-    overlay.show();
-    overlay.raise();
+    // ── POSITION: FLUSH AT TOP EDGE, CENTERED HORIZONTALLY ───────────────────
+    // codenotch sits at y=0 (top of screen). We do the same.
+    // The pill's square-top + rounded-bottom visually merges with the screen edge.
+    if (QScreen *screen = QGuiApplication::primaryScreen()) {
+        QRect geom = screen->geometry(); // full screen rect, NOT visibleGeometry
+        int pillWidth = view.rootObject() ? (int)view.rootObject()->width() : 240;
+        int x = geom.x() + (geom.width() - pillWidth) / 2;
+        int y = geom.y(); // y=0: flush at the very top edge
+        view.setPosition(x, y);
+    }
 
-    qDebug() << "[CodeHalo] Native Overlay active at:" << overlay.pos() 
-             << "Size:" << overlay.size()
-             << "WinId:" << (void*)overlay.winId();
+    view.show();
+    view.raise();
+
+#ifdef Q_OS_WIN
+    HWND hwnd = (HWND)view.winId();
+
+    // WS_EX_LAYERED: required for true alpha transparency via DWM
+    // WS_EX_TRANSPARENT: mouse clicks pass through transparent regions
+    // WS_EX_TOOLWINDOW: no taskbar entry
+    // WS_EX_NOACTIVATE: does not steal focus
+    LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+    exStyle |= WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
+    SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle);
+
+    // LWA_ALPHA = 255: fully opaque (DWM uses per-pixel alpha from the surface)
+    // We set layered but let Qt's OpenGL surface supply the per-pixel alpha.
+    SetLayeredWindowAttributes(hwnd, 0, 255, LWA_ALPHA);
+
+    // Pin to topmost z-order
+    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+    // Update window dimensions from root object
+    if (view.rootObject()) {
+        int w = (int)view.rootObject()->width();
+        int h = (int)view.rootObject()->height();
+        if (QScreen *screen = QGuiApplication::primaryScreen()) {
+            QRect geom = screen->geometry();
+            int x = geom.x() + (geom.width() - w) / 2;
+            SetWindowPos(hwnd, HWND_TOPMOST, x, geom.y(), w, h,
+                         SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        }
+    }
+#endif
+
+    qDebug() << "[CodeHalo] Running at" << view.position() << "size" << view.size();
 
     return app.exec();
 }

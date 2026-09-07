@@ -1,120 +1,50 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import "components"
 
+// Root is TRANSPARENT — only the notch shape is visible
 Item {
-    id: rootWindow
-    width: 380
-    height: isExpanded ? 240 : 54
+    id: root
+
+    // Collapsed: just the pill height. Expanded: pill + card below
+    property bool isExpanded: false
+    property bool isHovered: false
+
+    width: notchPill.width
+    height: isExpanded ? notchPill.height + expandedCard.height + 6 : notchPill.height
 
     Behavior on height {
-        NumberAnimation {
-            duration: 220
-            easing.type: Easing.OutCubic
-        }
+        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+    }
+    Behavior on width {
+        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
     }
 
-    property bool isExpanded: false
-    property string currentEdge: "top"
+    // ── Collapsed Notch Pill ──────────────────────────────────────────────────
+    NotchPill {
+        id: notchPill
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        isExpanded: root.isExpanded
+        isHovered: root.isHovered
+        onHoverEnter: root.isHovered = true
+        onHoverExit: root.isHovered = false
+        onToggleExpand: root.isExpanded = !root.isExpanded
+    }
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 4
-        spacing: 8
+    // ── Expanded Card ─────────────────────────────────────────────────────────
+    ExpandedCard {
+        id: expandedCard
+        anchors.top: notchPill.bottom
+        anchors.topMargin: 6
+        anchors.horizontalCenter: parent.horizontalCenter
+        visible: root.isExpanded
+        opacity: root.isExpanded ? 1.0 : 0.0
 
-        // Collapsed HUD Pill
-        Hud {
-            Layout.alignment: Qt.AlignHCenter
-            edgeTag: rootWindow.currentEdge.toUpperCase()
-            onClicked: {
-                rootWindow.isExpanded = !rootWindow.isExpanded
-            }
+        Behavior on opacity {
+            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
         }
 
-        // Expanded Card
-        Rectangle {
-            id: expandedDrawer
-            visible: rootWindow.isExpanded
-            opacity: rootWindow.isExpanded ? 1.0 : 0.0
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            radius: 12
-            color: "#DE0E1117"
-            border.color: "#1FFFFFFF"
-            border.width: 1
-
-            Behavior on opacity {
-                NumberAnimation { duration: 180 }
-            }
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 14
-                spacing: 12
-
-                // Header
-                RowLayout {
-                    Layout.fillWidth: true
-                    Text {
-                        text: "CODEHALO DISPLAY & EDGE"
-                        font.family: "Segoe UI, Inter, sans-serif"
-                        font.pixelSize: 9
-                        font.bold: true
-                        color: "#94A3B8"
-                    }
-                    Item { Layout.fillWidth: true }
-                    Button {
-                        text: "✕"
-                        flat: true
-                        onClicked: rootWindow.isExpanded = false
-                    }
-                }
-
-                // Edge selector
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
-
-                    Repeater {
-                        model: ["top", "bottom", "left", "right"]
-                        Button {
-                            id: edgeBtn
-                            text: modelData.toUpperCase()
-                            Layout.fillWidth: true
-                            highlighted: rootWindow.currentEdge === modelData
-                            onClicked: rootWindow.currentEdge = modelData
-                        }
-                    }
-                }
-
-                // Status info
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    radius: 8
-                    color: "#10FFFFFF"
-
-                    ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        spacing: 6
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Text { text: "Render Engine"; color: "#94A3B8"; font.pixelSize: 11 }
-                            Item { Layout.fillWidth: true }
-                            Text { text: "Qt 6 Quick / QML (GPU Native)"; color: "#38BDF8"; font.pixelSize: 11 }
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Text { text: "Window State"; color: "#94A3B8"; font.pixelSize: 11 }
-                            Item { Layout.fillWidth: true }
-                            Text { text: "Frameless / Always-On-Top"; color: "#10B981"; font.pixelSize: 11 }
-                        }
-                    }
-                }
-            }
-        }
+        onClose: root.isExpanded = false
     }
 }
