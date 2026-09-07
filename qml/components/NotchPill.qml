@@ -15,14 +15,9 @@ Rectangle {
 
     antialiasing: true
 
-    // Hover-grow + press-squash, anchored at the screen edge so the
-    // pill stays flush at top while it breathes downward.
+    // Tactile press squash; state scale is orchestrated by Main.qml
     transformOrigin: Item.Top
-    scale: isPressed ? 0.97 : (isHovered ? 1.03 : 1.0)
-
-    Behavior on scale {
-        SpringAnimation { spring: 6.0; damping: 0.6; mass: 0.5; epsilon: 0.01 }
-    }
+    scale: isPressed ? 0.97 : 1.0
 
     // Pill size: comfortable height + clear spacing
     implicitWidth: pillRow.implicitWidth + 32
@@ -61,6 +56,8 @@ Rectangle {
         }
     }
 
+    property var providers: []
+
     // Content row
     RowLayout {
         id: pillRow
@@ -92,37 +89,16 @@ Rectangle {
             }
         }
 
-        // Provider usage rings
-        ProviderRing {
-            label: "C"
-            ringColor: "#DA7756"  // Claude orange
-            usedFraction: 0.35
-            isActive: true
-            Layout.alignment: Qt.AlignVCenter
-        }
-
-        ProviderRing {
-            label: "G"
-            ringColor: "#38BDF8"  // Gemini/AGY blue
-            usedFraction: 0.72
-            isActive: false
-            Layout.alignment: Qt.AlignVCenter
-        }
-
-        ProviderRing {
-            label: "X"
-            ringColor: "#A78BFA"  // Codex purple
-            usedFraction: 0.15
-            isActive: false
-            Layout.alignment: Qt.AlignVCenter
-        }
-
-        ProviderRing {
-            label: "K"
-            ringColor: "#34D399"  // Cursor green
-            usedFraction: 0.58
-            isActive: false
-            Layout.alignment: Qt.AlignVCenter
+        // Provider usage rings rendered dynamically from model
+        Repeater {
+            model: pill.providers
+            ProviderRing {
+                label: modelData.label
+                ringColor: modelData.color
+                usedFraction: modelData.usedFraction
+                isActive: modelData.isActive
+                Layout.alignment: Qt.AlignVCenter
+            }
         }
     }
 

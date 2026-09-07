@@ -26,6 +26,8 @@ Rectangle {
         z: 1
     }
 
+    property var providers: []
+
     ColumnLayout {
         id: contentCol
         anchors.left: parent.left
@@ -64,11 +66,19 @@ Rectangle {
             }
         }
 
-        // Provider rows
-        ProviderRow { providerName: "Claude Code"; label: "C"; ringColor: "#DA7756"; usedFraction: 0.35; statusText: "3 sessions active"; isActive: true }
-        ProviderRow { providerName: "Gemini / AGY"; label: "G"; ringColor: "#38BDF8"; usedFraction: 0.72; statusText: "72% used · resets 2h" }
-        ProviderRow { providerName: "Codex";        label: "X"; ringColor: "#A78BFA"; usedFraction: 0.15; statusText: "Plenty remaining" }
-        ProviderRow { providerName: "Cursor";       label: "K"; ringColor: "#34D399"; usedFraction: 0.58; statusText: "Waiting on you"; isBlocked: true }
+        // Provider rows rendered dynamically from model
+        Repeater {
+            model: card.providers
+            ProviderRow {
+                providerName: modelData.name
+                label: modelData.label
+                ringColor: modelData.color
+                usedFraction: modelData.usedFraction
+                statusText: modelData.status
+                isActive: modelData.isActive
+                isBlocked: modelData.isBlocked
+            }
+        }
 
         // Divider
         Rectangle {

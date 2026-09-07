@@ -14,7 +14,7 @@ Rectangle {
     border.color: glowColor
     border.width: 2
 
-    // Fluid pulse rotation & scale animation
+    // Fluid pulse scale & opacity glow animation
     SequentialAnimation on scale {
         running: haloRing.active
         loops: Animation.Infinite

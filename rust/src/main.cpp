@@ -9,11 +9,50 @@
 #include <QGuiApplication>
 #include <QSurfaceFormat>
 #include <QTimer>
+#include <QAbstractNativeEventFilter>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
+#include <windowsx.h>
 #include <shellscalingapi.h>
 #pragma comment(lib, "Shcore.lib")
+
+class OverlayHitTestFilter : public QAbstractNativeEventFilter {
+    QQuickView *m_view;
+public:
+    explicit OverlayHitTestFilter(QQuickView *view) : m_view(view) {}
+
+    bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override {
+        if (eventType == "windows_generic_MSG") {
+            MSG *msg = static_cast<MSG*>(message);
+            if (msg->message == WM_NCHITTEST && m_view && m_view->rootObject()) {
+                HWND hwnd = (HWND)m_view->winId();
+                if (msg->hwnd == hwnd) {
+                    int screenX = GET_X_LPARAM(msg->lParam);
+                    int screenY = GET_Y_LPARAM(msg->lParam);
+                    QPoint localPos = m_view->mapFromGlobal(QPoint(screenX, screenY));
+
+                    QQuickItem *root = m_view->rootObject();
+                    if (!root || localPos.x() < 0 || localPos.x() >= root->width() ||
+                        localPos.y() < 0 || localPos.y() >= root->height()) {
+                        *result = HTTRANSPARENT;
+                        return true;
+                    }
+
+                    // Check if mouse hits an active visible child (NotchPill or ExpandedCard)
+                    QQuickItem *child = root->childAt(localPos.x(), localPos.y());
+                    if (!child || child == root || !child->isVisible()) {
+                        *result = HTTRANSPARENT;
+                        return true;
+                    }
+                    *result = HTCLIENT;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
 #endif
 
 int main(int argc, char *argv[]) {
@@ -119,6 +158,10 @@ int main(int argc, char *argv[]) {
     // Ensure topmost z-order without interfering with geometry managed by Qt
     SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                  SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+    // Install transparent click-through filter so mouse events outside pill/card pass through
+    OverlayHitTestFilter hitTestFilter(&view);
+    app.installNativeEventFilter(&hitTestFilter);
 #endif
 
     QScreen *curScreen = view.screen() ? view.screen() : QGuiApplication::primaryScreen();
