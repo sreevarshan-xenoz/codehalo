@@ -1,20 +1,10 @@
+pub mod errors;
+pub mod events;
 pub mod models;
+pub mod state;
 
-use models::{EdgePosition, ProviderUsage};
-use std::sync::Mutex;
+pub use errors::ProviderError;
+pub use events::AppEvent;
+pub use models::{EdgePosition, MonitorInfo, ProviderId, ProviderSnapshot, ProviderStatus, UsageSource};
+pub use state::{AppState, ProviderState};
 
-pub struct ApplicationState {
-    pub current_edge: Mutex<EdgePosition>,
-    pub monitor_index: Mutex<usize>,
-    pub cached_usages: Mutex<Vec<ProviderUsage>>,
-}
-
-impl Default for ApplicationState {
-    fn default() -> Self {
-        Self {
-            current_edge: Mutex::new(EdgePosition::Top),
-            monitor_index: Mutex::new(0),
-            cached_usages: Mutex::new(Vec::new()),
-        }
-    }
-}

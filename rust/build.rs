@@ -10,4 +10,11 @@ fn main() {
             ..Default::default()
         })
         .build();
+
+    #[cfg(windows)]
+    {
+        println!("cargo:rustc-link-lib=Qt6Core");
+        println!("cargo:rustc-link-lib=Qt6Gui");
+        println!("cargo:rustc-link-lib=Qt6Qml");
+    }
 }
