@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "AgentHUD",
+  "productName": "CodeHalo",
   "version": "0.1.0",
-  "identifier": "com.agenthud.app",
+  "identifier": "com.codehalo.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "AgentHUD",
+        "title": "CodeHalo",
         "width": 380,
         "height": 48,
         "decorations": false,

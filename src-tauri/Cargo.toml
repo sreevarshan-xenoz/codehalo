@@ -1,8 +1,8 @@
 [package]
-name = "agent-hud"
+name = "codehalo"
 version = "0.1.0"
 description = "Your AI coding agents, at a glance."
-authors = ["AgentHUD Contributors"]
+authors = ["CodeHalo Contributors"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

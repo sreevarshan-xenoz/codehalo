@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize};
+use tauri::{AppHandle, Manager, PhysicalPosition};
 use crate::models::{EdgePosition, HudWindowConfig};
 
 /// Position the HUD overlay window along the requested monitor edge

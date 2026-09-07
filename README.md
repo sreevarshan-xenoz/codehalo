@@ -1,8 +1,8 @@
-# AgentHUD
+# CodeHalo
 
 > **Your AI coding agents, at a glance.**
 
-AgentHUD is a modern, lightweight, transparent desktop overlay for **Windows and Linux** that monitors your AI coding agent usage (Claude Code, OpenAI Codex, Cursor, Gemini/Antigravity, and more) in one unified screen-edge HUD.
+CodeHalo is a modern, lightweight, transparent desktop overlay for **Windows and Linux** that monitors your AI coding agent usage (Claude Code, OpenAI Codex, Cursor, Gemini/Antigravity, and more) in one unified screen-edge HUD.
 
 ---
 

@@ -5,7 +5,7 @@ pub mod provider;
 use models::{HudWindowConfig, ProviderUsageSnapshot};
 use overlay::position_hud_overlay;
 use std::sync::Mutex;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Manager, State};
 
 pub struct AppState {
     pub config: Mutex<HudWindowConfig>,
@@ -72,5 +72,5 @@ pub fn run() {
             Ok(())
         })
         .run(tauri::generate_context!())
-        .expect("error while running AgentHUD application");
+        .expect("error while running CodeHalo application");
 }

@@ -1,6 +1,6 @@
-# Contributing to AgentHUD
+# Contributing to CodeHalo
 
-Thank you for your interest in contributing to **AgentHUD**! We are building the cleanest, lightest cross-platform HUD for AI coding tools.
+Thank you for your interest in contributing to **CodeHalo**! We are building the cleanest, lightest cross-platform HUD for AI coding tools.
 
 ---
 

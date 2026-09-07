@@ -1,7 +1,7 @@
-# AgentHUD Architecture Specification
+# CodeHalo Architecture Specification
 
 ## 1. Overview
-**AgentHUD** is a lightweight, cross-platform (Windows & Linux) desktop overlay for monitoring AI coding agent usage (e.g., Claude Code, Codex, Cursor, Gemini/Antigravity).
+**CodeHalo** is a lightweight, cross-platform (Windows & Linux) desktop overlay for monitoring AI coding agent usage (e.g., Claude Code, Codex, Cursor, Gemini/Antigravity).
 
 It sits unobtrusively on the screen edge (Top, Bottom, Left, Right) as a compact HUD, expanding on interaction to provide real-time quota, rate limit, and session visibility without opening multiple vendor dashboards.
 
