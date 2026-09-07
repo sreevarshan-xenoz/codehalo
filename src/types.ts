@@ -1,22 +1,18 @@
-export type ProviderId = "claude" | "codex" | "cursor" | "gemini";
-
-export type MetricType = "percentage" | "tokens" | "requests" | "cost";
-
-export interface ProviderUsage {
-  id: ProviderId;
-  name: string;
-  percentage: number; // 0-100
-  usedDisplay: string;
-  limitDisplay: string;
-  status: "ok" | "warning" | "error" | "offline";
-  isEstimate: boolean;
-  statusMessage?: string;
-  lastUpdated: string;
+export interface MonitorInfo {
+  index: usize;
+  name: string | null;
+  width: number;
+  height: number;
+  scale_factor: number;
+  is_primary: boolean;
 }
 
-export interface HudConfig {
-  position: "top" | "bottom" | "left" | "right";
-  isExpanded: boolean;
-  theme: "dark" | "oled" | "system";
-  opacity: number;
+export type usize = number;
+
+export type EdgePosition = "top" | "bottom" | "left" | "right";
+
+export interface HudWindowConfig {
+  edge: EdgePosition;
+  monitor_index: number;
+  offset_px: number;
 }

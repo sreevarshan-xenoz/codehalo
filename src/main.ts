@@ -1,80 +1,75 @@
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
-import type { ProviderUsage } from "./types";
+import type { EdgePosition, HudWindowConfig, MonitorInfo } from "./types";
 
 const appWindow = getCurrentWindow();
 
-// Default provider snapshot state
-let providers: ProviderUsage[] = [
-  {
-    id: "claude",
-    name: "Claude Code",
-    percentage: 82,
-    usedDisplay: "820k / 1M tokens",
-    limitDisplay: "Daily limit",
-    status: "ok",
-    isEstimate: false,
-    lastUpdated: "12s ago",
-  },
-  {
-    id: "codex",
-    name: "OpenAI Codex",
-    percentage: 61,
-    usedDisplay: "61 / 100 requests",
-    limitDisplay: "5-hour window",
-    status: "ok",
-    isEstimate: false,
-    lastUpdated: "45s ago",
-  },
-  {
-    id: "cursor",
-    name: "Cursor Pro",
-    percentage: 48,
-    usedDisplay: "240 / 500 fast calls",
-    limitDisplay: "Monthly reset in 12d",
-    status: "ok",
-    isEstimate: false,
-    lastUpdated: "2m ago",
-  },
-];
-
+let monitors: MonitorInfo[] = [];
+let currentConfig: HudWindowConfig = {
+  edge: "top",
+  monitor_index: 0,
+  offset_px: 12,
+};
 let isExpanded = false;
 
-function renderHud() {
-  const container = document.getElementById("provider-container");
-  if (!container) return;
+async function refreshMonitors() {
+  try {
+    monitors = await invoke<MonitorInfo[]>("get_monitors");
+    renderMonitors();
+  } catch (err) {
+    console.error("Failed to load monitors", err);
+  }
+}
 
-  // Update collapsed pill summary
-  const pillClaude = document.getElementById("pill-claude");
-  const pillCodex = document.getElementById("pill-codex");
-  if (pillClaude && providers[0]) pillClaude.textContent = `${providers[0].percentage}%`;
-  if (pillCodex && providers[1]) pillCodex.textContent = `${providers[1].percentage}%`;
+async function loadConfig() {
+  try {
+    currentConfig = await invoke<HudWindowConfig>("get_hud_config");
+    updateEdgeButtons();
+    updatePillDisplay();
+  } catch (err) {
+    console.error("Failed to load config", err);
+  }
+}
 
-  // Render expanded items
-  container.innerHTML = providers
-    .map((p) => {
-      const statusClass =
-        p.percentage > 85 ? "status-critical" : p.percentage > 70 ? "status-warning" : "status-ok";
-      return `
-        <div class="provider-item" data-id="${p.id}">
-          <div class="provider-item-header">
-            <span class="provider-name">
-              ${p.name}
-              ${p.isEstimate ? '<span class="provider-badge">Estimate</span>' : ""}
-            </span>
-            <span class="provider-stat">${p.percentage}%</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill ${statusClass}" style="width: ${p.percentage}%"></div>
-          </div>
-          <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 2px;">
-            <span>${p.usedDisplay}</span>
-            <span>${p.limitDisplay}</span>
-          </div>
-        </div>
-      `;
+function renderMonitors() {
+  const select = document.getElementById("monitor-select") as HTMLSelectElement | null;
+  const scaleText = document.getElementById("stat-scale-factor");
+  if (!select) return;
+
+  if (monitors.length === 0) {
+    select.innerHTML = '<option value="0">Default Display (100%)</option>';
+    return;
+  }
+
+  select.innerHTML = monitors
+    .map((m) => {
+      const label = `${m.name || `Display ${m.index + 1}`} (${m.width}x${m.height} @ ${Math.round(m.scale_factor * 100)}%)${m.is_primary ? " [Primary]" : ""}`;
+      return `<option value="${m.index}" ${m.index === currentConfig.monitor_index ? "selected" : ""}>${label}</option>`;
     })
     .join("");
+
+  const activeMonitor = monitors[currentConfig.monitor_index] || monitors[0];
+  if (activeMonitor && scaleText) {
+    scaleText.textContent = `${activeMonitor.scale_factor}x (${Math.round(activeMonitor.scale_factor * 100)}%)`;
+  }
+}
+
+function updateEdgeButtons() {
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".btn-edge");
+  buttons.forEach((btn) => {
+    if (btn.dataset.edge === currentConfig.edge) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+}
+
+function updatePillDisplay() {
+  const pillEdgeTag = document.getElementById("pill-edge-tag");
+  if (pillEdgeTag) {
+    pillEdgeTag.textContent = currentConfig.edge.toUpperCase();
+  }
 }
 
 async function setExpanded(expanded: boolean) {
@@ -84,21 +79,37 @@ async function setExpanded(expanded: boolean) {
 
   if (isExpanded) {
     root.classList.add("expanded");
-    // Expand Tauri window height
-    await appWindow.setSize(new LogicalSize(380, 290));
+    await appWindow.setSize(new LogicalSize(380, 260));
   } else {
     root.classList.remove("expanded");
-    // Shrink Tauri window to compact pill
     await appWindow.setSize(new LogicalSize(380, 48));
   }
 }
 
+async function setEdgeAndMonitor(edge: EdgePosition, monitorIndex: number) {
+  currentConfig.edge = edge;
+  currentConfig.monitor_index = monitorIndex;
+  updateEdgeButtons();
+  updatePillDisplay();
+
+  try {
+    await invoke("update_hud_position", {
+      edge,
+      monitorIndex,
+    });
+  } catch (err) {
+    console.error("Failed to update position:", err);
+  }
+}
+
 async function init() {
-  renderHud();
+  await refreshMonitors();
+  await loadConfig();
 
   const pill = document.getElementById("hud-pill");
   const btnCollapse = document.getElementById("btn-collapse");
-  const btnRefresh = document.getElementById("btn-refresh");
+  const monitorSelect = document.getElementById("monitor-select") as HTMLSelectElement | null;
+  const edgeButtons = document.querySelectorAll<HTMLButtonElement>(".btn-edge");
 
   pill?.addEventListener("click", () => {
     setExpanded(!isExpanded);
@@ -109,21 +120,22 @@ async function init() {
     setExpanded(false);
   });
 
-  btnRefresh?.addEventListener("click", async (e) => {
-    e.stopPropagation();
-    try {
-      const res = await invoke<ProviderUsage[]>("get_provider_usages");
-      if (res && res.length > 0) {
-        providers = res;
-        renderHud();
-      }
-    } catch {
-      // Keep UI functional during backend initialization
-      renderHud();
-    }
+  monitorSelect?.addEventListener("change", async (e) => {
+    const target = e.target as HTMLSelectElement;
+    const monitorIdx = parseInt(target.value, 10);
+    await setEdgeAndMonitor(currentConfig.edge, monitorIdx);
+    renderMonitors();
   });
 
-  // Query rust backend for initial monitor / positioning sync
+  edgeButtons.forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const edge = (btn.dataset.edge || "top") as EdgePosition;
+      await setEdgeAndMonitor(edge, currentConfig.monitor_index);
+    });
+  });
+
+  // Ensure window is placed properly on initial boot
   try {
     await invoke("sync_overlay_position");
   } catch {
