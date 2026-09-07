@@ -1,8 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 
-// Circular usage ring — grey track + colored arc, small glyph letter in center
-// Based on codenotch's ProviderRing design: 44pt diameter, strokeBorder grey track + sweep arc
+// Circular usage ring — grey track + colored arc, crisp glyph letter in center
 Rectangle {
     id: ring
 
@@ -11,9 +10,10 @@ Rectangle {
     property real usedFraction: 0.0       // 0.0 to 1.0
     property bool isActive: false         // spinning arc when true
 
-    implicitWidth: 28
-    implicitHeight: 28
+    implicitWidth: 30
+    implicitHeight: 30
     color: "transparent"
+    antialiasing: true
 
     // Spinning state for active indicator
     property real spinAngle: 0
@@ -28,10 +28,11 @@ Rectangle {
     Shape {
         anchors.fill: parent
         antialiasing: true
+        preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
             strokeColor: "#333333"
-            strokeWidth: 2.5
+            strokeWidth: 2.8
             fillColor: "transparent"
             capStyle: ShapePath.FlatCap
             PathAngleArc {
@@ -49,11 +50,12 @@ Rectangle {
     Shape {
         anchors.fill: parent
         antialiasing: true
+        preferredRendererType: Shape.CurveRenderer
         visible: usedFraction > 0
 
         ShapePath {
             strokeColor: ring.ringColor
-            strokeWidth: 2.5
+            strokeWidth: 2.8
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             PathAngleArc {
@@ -72,10 +74,11 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 5
         antialiasing: true
+        preferredRendererType: Shape.CurveRenderer
         visible: ring.isActive
 
         ShapePath {
-            strokeColor: "#AAAAAA"
+            strokeColor: "#DDDDDD"
             strokeWidth: 1.5
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
@@ -94,9 +97,10 @@ Rectangle {
     Text {
         anchors.centerIn: parent
         text: ring.label
-        font.pixelSize: 9
+        font.pixelSize: 10
         font.bold: true
         font.family: "Segoe UI, Inter, sans-serif"
-        color: "#CCCCCC"
+        color: "#E2E8F0"
+        renderType: Text.NativeRendering
     }
 }

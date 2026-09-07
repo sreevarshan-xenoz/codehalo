@@ -11,18 +11,26 @@ Rectangle {
 
     property bool isExpanded: false
     property bool isHovered: false
+    property bool isPressed: false
 
-    // Pill size: wide enough for 4 rings + spacing + logo + label
-    implicitWidth: pillRow.implicitWidth + 28
-    implicitHeight: 36
+    antialiasing: true
+
+    // Hover-grow + press-squash, anchored at the screen edge so the
+    // pill stays flush at top while it breathes downward.
+    transformOrigin: Item.Top
+    scale: isPressed ? 0.97 : (isHovered ? 1.03 : 1.0)
+
+    Behavior on scale {
+        SpringAnimation { spring: 6.0; damping: 0.6; mass: 0.5; epsilon: 0.01 }
+    }
+
+    // Pill size: comfortable height + clear spacing
+    implicitWidth: pillRow.implicitWidth + 32
+    implicitHeight: 40
 
     // Black, rounded only at the BOTTOM (top edge is flush with screen top)
     color: "#000000"
-    radius: 18
-
-    // Clip so the top corners stay square (flush with screen edge)
-    layer.enabled: true
-    layer.effect: null
+    radius: 20
 
     // Top edge clip: overlay a black rectangle over the top rounded corners
     Rectangle {
@@ -34,40 +42,53 @@ Rectangle {
         z: 1
     }
 
-    // Subtle bottom glow when hovered
+    // Subtle bottom & side glow when hovered (top is flush outside)
     Rectangle {
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.topMargin: -2
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         radius: parent.radius
         color: "transparent"
         border.color: isHovered ? "#22FFFFFF" : "transparent"
         border.width: 1
+        antialiasing: true
         z: 2
+
+        Behavior on border.color {
+            ColorAnimation { duration: 160; easing.type: Easing.OutCubic }
+        }
     }
 
     // Content row
     RowLayout {
         id: pillRow
         anchors.centerIn: parent
-        anchors.verticalCenterOffset: 4  // Push down slightly since top is cut off visually
-        spacing: 10
+        anchors.verticalCenterOffset: 2
+        spacing: 12
         z: 3
 
-        // CodeHalo icon/logo — small
+        // CodeHalo icon/logo — crisp and clear
         Rectangle {
-            width: 16
-            height: 16
-            radius: 4
+            width: 22
+            height: 22
+            radius: 5
             color: "#1A1A2E"
             border.color: "#38BDF8"
             border.width: 1
+            antialiasing: true
             Layout.alignment: Qt.AlignVCenter
 
             Image {
                 anchors.fill: parent
-                anchors.margins: 2
+                anchors.margins: 3
                 source: "qrc:/CodeHalo/assets/icons/codehalo.png"
+                sourceSize.width: 48
+                sourceSize.height: 48
                 fillMode: Image.PreserveAspectFit
                 smooth: true
+                mipmap: true
             }
         }
 
@@ -118,8 +139,11 @@ Rectangle {
         }
         onExited: {
             pill.isHovered = false
+            pill.isPressed = false
             pill.hoverExit()
         }
+        onPressed: pill.isPressed = true
+        onReleased: pill.isPressed = false
         onClicked: pill.toggleExpand()
     }
 }
