@@ -2,48 +2,52 @@
 
 > **Your AI coding agents, at a glance.**
 
-CodeHalo is a modern, lightweight, transparent desktop overlay for **Windows and Linux** that monitors your AI coding agent usage (Claude Code, OpenAI Codex, Cursor, Gemini/Antigravity, and more) in one unified screen-edge HUD.
+CodeHalo is a native, hardware-accelerated desktop overlay for **Windows and Linux** that monitors your AI coding agent usage (Claude Code, OpenAI Codex, Cursor, Gemini/Antigravity, and more) in one unified, unobtrusive screen-edge HUD.
 
 ---
 
-## Features
+## 🔒 Tech Stack
 
-- 🪟 **Minimal Screen-Edge Overlay**: Collapsed pill HUD that expands on hover/click into detailed breakdown metrics.
-- ⚡ **Lightweight & Native**: Built with Tauri 2 + Rust for minimal memory and CPU footprint.
-- 🔒 **Privacy-First & Local**: Direct provider polling with local credential management (Windows Credential Manager / Linux Secret Service). No intermediary servers or telemetry.
-- 🖥️ **Multi-Monitor Aware**: Position on Top, Bottom, Left, or Right edges on any connected monitor with proper DPI scaling.
-- 🔌 **Extensible Provider System**: Pluggable architecture distinguishing official, local, and estimated metrics.
+- **Core Engine**: Rust (Tokio, Rusqlite, Serde, Reqwest)
+- **UI Framework**: Qt 6 Quick / QML (Direct GPU rendering, fluid 60/120fps animations)
+- **Rust ↔ Qt Bridge**: CXX-Qt
+- **Build System**: CMake + Cargo (standalone native binary)
+- **Target OS**: Windows 10/11 & Linux (Wayland-first with X11 fallback)
 
 ---
 
-## Development
+## 🏗️ Architecture
+
+CodeHalo follows a strict architectural contract:
+> **Rust owns the application. QML owns the presentation.**
+
+```text
+Rust Core ──▶ CXX-Qt Bridge ──▶ Qt Quick / QML Presentation
+```
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for full system specifications.
+
+---
+
+## 📦 Building from Source
 
 ### Prerequisites
-
-- **Node.js**: v18+
 - **Rust**: 1.75+
-- **Platform Dependencies**:
-  - Windows: Visual Studio C++ Build Tools & WebView2
-  - Linux: `libwebkit2gtk-4.1-dev`, `build-essential`, `libssl-dev`, `libgtk-3-dev`, `libayatana-appindicator3-dev`
+- **CMake**: 3.22+
+- **Qt 6**: 6.5+ (Quick, QML, QuickControls2)
+- **C++ Compiler**: MSVC 2019+ or GCC/Clang with C++20 support
 
-### Getting Started
-
+### Build Commands
 ```bash
-# Install frontend dependencies
-npm install
+# Configure with CMake
+cmake -B build -S .
 
-# Run desktop app in development mode
-npm run tauri dev
+# Build binary
+cmake --build build --config Release
 ```
 
 ---
 
-## Architecture
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed structural designs, platform abstractions, and provider contracts.
-
----
-
-## License
+## 📄 License
 
 MIT

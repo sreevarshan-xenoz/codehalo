@@ -7,17 +7,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-  check-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-
   check-rust:
     strategy:
       fail-fast: false
@@ -26,17 +15,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
-      - name: Install Linux system dependencies
+      - name: Install Linux Dependencies & Qt
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
-      - run: npm ci
-      - name: Cargo Check
-        run: cargo check --manifest-path src-tauri/Cargo.toml
+          sudo apt-get install -y cmake qt6-base-dev qt6-declarative-dev libgl1-mesa-dev
+      - name: Verify Rust Engine & CXX-Qt Check
+        run: cargo check --manifest-path rust/Cargo.toml
