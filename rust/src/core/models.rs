@@ -1,6 +1,4 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ProviderStatus {
     Ok,
     Warning,
@@ -8,7 +6,7 @@ pub enum ProviderStatus {
     Offline,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct ProviderUsage {
     pub id: String,
     pub name: String,
@@ -20,7 +18,7 @@ pub struct ProviderUsage {
     pub last_updated: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EdgePosition {
     Top,
     Bottom,
@@ -28,7 +26,7 @@ pub enum EdgePosition {
     Right,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct MonitorInfo {
     pub index: usize,
     pub name: String,
