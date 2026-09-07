@@ -1,0 +1,23 @@
+name: Feature Request
+description: Suggest an idea or new provider for AgentHUD
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping make AgentHUD better!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem or provider?
+      placeholder: "e.g. I use XYZ AI coding agent and would love to see token quotas in the HUD."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution / Provider Details
+      placeholder: Describe how it should work, available APIs/CLI token paths if known.
+    validations:
+      required: true
