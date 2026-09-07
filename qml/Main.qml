@@ -1,20 +1,12 @@
 import QtQuick
-import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Controls
 import "components"
 
-Window {
-    id: mainWindow
-    visible: true
-    title: "CodeHalo"
-
-    // Milestone 1: Frameless, transparent, always-on-top overlay
-    flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool
-    color: "transparent"
-
+Item {
+    id: rootWindow
     width: 380
-    height: isExpanded ? 240 : 46
+    height: isExpanded ? 240 : 54
 
     Behavior on height {
         NumberAnimation {
@@ -34,17 +26,17 @@ Window {
         // Collapsed HUD Pill
         Hud {
             Layout.alignment: Qt.AlignHCenter
-            edgeTag: mainWindow.currentEdge.toUpperCase()
+            edgeTag: rootWindow.currentEdge.toUpperCase()
             onClicked: {
-                mainWindow.isExpanded = !mainWindow.isExpanded
+                rootWindow.isExpanded = !rootWindow.isExpanded
             }
         }
 
         // Expanded Card
         Rectangle {
             id: expandedDrawer
-            visible: mainWindow.isExpanded
-            opacity: mainWindow.isExpanded ? 1.0 : 0.0
+            visible: rootWindow.isExpanded
+            opacity: rootWindow.isExpanded ? 1.0 : 0.0
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: 12
@@ -75,7 +67,7 @@ Window {
                     Button {
                         text: "✕"
                         flat: true
-                        onClicked: mainWindow.isExpanded = false
+                        onClicked: rootWindow.isExpanded = false
                     }
                 }
 
@@ -90,8 +82,8 @@ Window {
                             id: edgeBtn
                             text: modelData.toUpperCase()
                             Layout.fillWidth: true
-                            highlighted: mainWindow.currentEdge === modelData
-                            onClicked: mainWindow.currentEdge = modelData
+                            highlighted: rootWindow.currentEdge === modelData
+                            onClicked: rootWindow.currentEdge = modelData
                         }
                     }
                 }
